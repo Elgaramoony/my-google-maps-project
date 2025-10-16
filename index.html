@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خريطة تفاعلية - مشروع خرائط جوجل</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .map-container {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 10px;
+            border: 3px solid #4285F4;
+        }
+        
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .city-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .city-btn {
+            background: #4285F4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .city-btn:hover {
+            background: #3367D6;
+            transform: translateY(-2px);
+        }
+        
+        .info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-right: 4px solid #4285F4;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            #map {
+                height: 400px;
+            }
+            
+            .city-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ مشروع خرائط جوجل</h1>
+            <p>أول خريطة تفاعلية باستخدام Google Maps API</p>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+        
+        <div class="controls">
+            <h3 style="margin-bottom: 15px; color: #333;">اختر مدينة:</h3>
+            <div class="city-buttons">
+                <button class="city-btn" onclick="goToCity(24.7136, 46.6753, 'الرياض')">الرياض</button>
+                <button class="city-btn" onclick="goToCity(21.4858, 39.1925, 'جدة')">جدة</button>
+                <button class="city-btn" onclick="goToCity(21.3891, 39.8579, 'مكة')">مكة</button>
+                <button class="city-btn" onclick="goToCity(26.4207, 50.0888, 'الدمام')">الدمام</button>
+                <button class="city-btn" onclick="goToCity(24.5247, 39.5692, 'المدينة')">المدينة</button>
+            </div>
+            
+            <div class="info">
+                <p>✅ <strong>API Key:</strong> يعمل بشكل صحيح</p>
+                <p>📍 <strong>الحالة:</strong> جاهز للتطوير</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var map;
+        var currentMarker;
+
+        function initMap() {
+            // الخريطة الأولى - الرياض
+            var riyadh = {lat: 24.7136, lng: 46.6753};
+            
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: riyadh,
+                mapTypeId: 'roadmap',
+                styles: [
+                    {
+                        "featureType": "all",
+                        "elementType": "geometry.fill",
+                        "stylers": [{"weight": "2.00"}]
+                    },
+                    {
+                        "featureType": "all",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{"color": "#9c9c9c"}]
+                    }
+                ]
+            });
+            
+            // إضافة علامة أولية
+            currentMarker = new google.maps.Marker({
+                position: riyadh,
+                map: map,
+                title: 'الرياض - العاصمة',
+                animation: google.maps.Animation.DROP
+            });
+        }
+
+        function goToCity(lat, lng, cityName) {
+            var newLocation = {lat: lat, lng: lng};
+            
+            // تحريك الخريطة للموقع الجديد
+            map.setCenter(newLocation);
+            map.setZoom(12);
+            
+            // إزالة العلامة القديمة
+            if (currentMarker) {
+                currentMarker.setMap(null);
+            }
+            
+            // إضافة علامة جديدة
+            currentMarker = new google.maps.Marker({
+                position: newLocation,
+                map: map,
+                title: cityName,
+                animation: google.maps.Animation.BOUNCE
+            });
+            
+            // إيقاف الحركة بعد ثانيتين
+            setTimeout(() => {
+                if (currentMarker) {
+                    currentMarker.setAnimation(null);
+                }
+            }, 2000);
+        }
+    </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2VhKZomm95RvEYW3wBnXntTzFz4As_UY&callback=initMap" 
+            async defer></script>
+</body>
+</html>
